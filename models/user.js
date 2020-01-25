@@ -19,7 +19,10 @@ const userSchema = new Schema({
   },
   score: {
     type: Number,
-    default: 0
+    default:0
+  },
+  scoreList:{
+    type:[Number]
   },
   isAdmin: {
     type: Boolean,
