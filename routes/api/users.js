@@ -6,140 +6,113 @@ const router = express.Router();
 
 // register user
 
-// router.post("/", (req, res, next) => {
-//   User.create(req.body, (err, user) => {
-//     if (err) return next(err);
-//     if (!user) return res.json({ message: "no user found!", success: false });
-//     res.json({ user, success: true });
-//   });
-// });
-router.post("/", (req, res, next) => {
-  User.create(req.body)
-    .then(user => {
-      if (!user) return res.json({ sucess: false, message: "user not found!" });
-      res.json({ user, success: true });
-    })
-    .catch(err => {
-      return next(err);
-    });
+router.post("/", async (req, res, next) => {
+  try {
+    let user = await User.create(req.body);
+    if (!user) return res.json({ success: false, message: "user not found!" });
+    res.json({ user, success: true });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 // login user
 
-// router.post("/login", (req, res, next) => {
-// let { email, password } = req.body;
-//   User.findOne({ email }, (err, user) => {
-//     if (err) return next(err);
-//     if (!user) return res.json({ success: false, message: "invalid Email!" });
-//     user.verifyPassword(password, (err, matched) => {
-//       if (err) return next(err);
-//       if (!matched)
-//         return res
-//           .status(422)
-//           .json({ success: false, message: "invalid password" });
-//       jwt.sign(
-//         {
-//           userid: user._id,
-//           username: user.username,
-//           email: user.email,
-//           isadmin: user.isAdmin
-//         },
-//         "secret",
-//         (err, token) => {
-//           if (err) return next(err);
-//           res.json({ success: true, message: "you are logged in", token });
-//         }
-//       );
-//     });
-//   });
-// });
-
-router.post("/login", (req, res, next) => {
+router.post("/login", async (req, res, next) => {
   let { email, password } = req.body;
-  User.findOne({ email })
-    .then(user => {
-      if (!user) return res.json({ success: false, message: "invalid Email!" });
-      user.verifyPassword(password, (err, matched) => {
-        if (err) return next(err);
-        if (!matched)
-          return res.json({ success: false, message: "invalid password" });
-
-        //jwt
-        jwt.sign(
-          {
-            userid: user._id,
-            username: user.username,
-            email: user.email,
-            isadmin: user.isAdmin
-          },
-          "secret",
-          (err, token) => {
-            if (err) return next(err);
-            res.json({ success: true, message: "you are logged in", token });
-          }
-        );
-      });
-    })
-    .catch(err => {
+  try {
+    let user = await User.findOne({ email });
+    if (!user) return res.json({ success: false, message: "Invalid Email!" });
+    user.verifyPassword(password, (err, matched) => {
       if (err) return next(err);
+      if (!matched)
+        return res.json({ success: false, message: "Invalid Password!" });
+
+      // jwt
+
+      jwt.sign(
+        {
+          userid: user._id,
+          username: user.username,
+          email: user.email,
+          isadmin: user.isAdmin
+        },
+        "secret",
+        (err, token) => {
+          if (err) return next(err);
+          res.json({ success: true, message: "you are logged in", token });
+        }
+      );
     });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 /* GET users listing. */
 
-router.get("/", (req, res, next) => {
-  User.find({}, "-password", (err, users) => {
-    if (err) return next(err);
-    if (!users)
-      return res.json({ success: false, message: "users not found!" });
-    res.json({ users, success: true });
-  });
+router.get("/", async (req, res, next) => {
+  try {
+    let users = await User.find({}, "-password");
+    if (!users) return res.json({ success: false, message: "no users found!" });
+    res.json({ success: true, users });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 //get a user
 
-router.get("/:id", (req, res, next) => {
+router.get("/:id", async (req, res, next) => {
   const id = req.params.id;
-  User.findById(id, "-password", (err, user) => {
-    if (err) return next(err);
+  try {
+    let user = await User.findById(id, "-password");
     if (!user) res.json({ success: false, message: "no user found!" });
     res.json({ user, success: true });
-  });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 router.use(auth.verifyToken);
 
 // update user
 
-router.put("/:id", (req, res, next) => {
+router.put("/:id", async (req, res, next) => {
   const id = req.params.id;
-  User.findByIdAndUpdate(id, req.body, { new: true }, (err, user) => {
-    if (err) return next(err);
+  try {
+    let user = await User.findByIdAndUpdate(id, req.body, { new: true });
     if (!user) return res.json({ success: false, message: "user not found!" });
     res.json({ user, success: true });
-  });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 // update some info of user
 
-router.patch("/:id", (req, res, next) => {
+router.patch("/:id", async (req, res, next) => {
   const id = req.params.id;
-  User.findByIdAndUpdate(id, req.body, { new: true }, (err, user) => {
-    if (err) return next(err);
+  try {
+    let user = await User.findByIdAndUpdate(id, req.body, { new: true });
     if (!user) return res.json({ success: false, message: "user not found!" });
     res.json({ user, success: true });
-  });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 // delete a user
 
-router.delete("/:id", (req, res, next) => {
+router.delete("/:id", async (req, res, next) => {
   const id = req.params.id;
-  User.findByIdAndDelete(id, (err, user) => {
-    if (err) return next(err);
+  try {
+    let user = await User.findByIdAndDelete(id);
     if (!user) return res.json({ success: false, message: "user not found!" });
     res.json({ user, success: true, message: "succesfully deleted!" });
-  });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 module.exports = router;
