@@ -16,8 +16,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.use(auth.verifyToken);
-router.use(auth.verifyAdmin)
+router.use(auth.verifyToken, auth.verifyAdmin);
 
 // update a quizset
 

@@ -17,107 +17,145 @@ router.get("/", (req, res, next) => {
     });
 });
 
-router.use(auth.verifyToken);
-router.use(auth.verifyAdmin);
+router.use(auth.verifyToken, auth.verifyAdmin);
 
 // only admins can access
 
-router.post("/", (req, res, next) => {
+router.post("/", async (req, res, next) => {
   const adminid = req.user.userid;
-  Quiz.create(req.body, (err, quizToCreate) => {
-    if (err) return next(err);
+  try {
+    let quizToCreate = await Quiz.create(req.body);
     if (!quizToCreate)
-      return res.json({ success: false, message: "No Quiz found!" });
-    Quiz.findByIdAndUpdate(
-      quizToCreate._id,
-      { author: adminid },
-      (err, updatedQuiz) => {
-        if (err) return next(err);
-        if (!updatedQuiz)
-          return res.json({ success: false, message: "admin not found!" });
-      }
-    );
-    Quizset.findOne({ topic: quizToCreate.quizset }, (err, quizset) => {
-      if (err) return next(err);
-      if (!quizset) {
-        Quizset.create(
-          {
-            $push: { quiz: quizToCreate._id },
-            topic: quizToCreate.quizset
-          },
-          { new: true },
-          (err, createdQuizset) => {
-            if (err) return next(err);
-          }
-        );
-      } else if (quizset) {
-        Quizset.findByIdAndUpdate(
-          quizset._id,
-          { $push: { quiz: quizToCreate._id } },
-          { new: true },
-          (err, createdQuizset) => {
-            if (err) return next(err);
-          }
-        );
-      }
+      return res.json({ success: false, message: "can't create Quiz" });
+    let quizToUpdate = await Quiz.findByIdAndUpdate(quizToCreate._id, {
+      author: adminid
     });
+    if (!quizToUpdate)
+      return res.json({ success: false, message: "quiz not found!" });
+    let quizsetToFind = await Quizset.findOne({ topic: quizToCreate.quizset });
+    if (!quizsetToFind) {
+      let quizsetToCreate = await Quizset.create(
+        {
+          $push: { quiz: quizToCreate._id },
+          topic: quizToCreate.quizset
+        },
+        { new: true }
+      );
+    } else if (quizsetToFind) {
+      let quizsetToUpdate = await Quizset.findByIdAndUpdate(
+        quizsetToFind._id,
+        { $push: { quiz: quizToCreate._id } },
+        { new: true }
+      );
+    }
     res.status(200).json({
       success: true,
       message: "Quiz created Succesfully!",
       quizToCreate
     });
-  });
+  } catch (err) {
+    return next(err);
+  }
 });
+
+// router.post("/", (req, res, next) => {
+//   const adminid = req.user.userid;
+//   Quiz.create(req.body, (err, quizToCreate) => {
+//     if (err) return next(err);
+//     if (!quizToCreate)
+//       return res.json({ success: false, message: "No Quiz found!" });
+//     Quiz.findByIdAndUpdate(
+//       quizToCreate._id,
+//       { author: adminid },
+//       (err, updatedQuiz) => {
+//         if (err) return next(err);
+//         if (!updatedQuiz)
+//           return res.json({ success: false, message: "admin not found!" });
+//       }
+//     );
+//     Quizset.findOne({ topic: quizToCreate.quizset }, (err, quizset) => {
+//       if (err) return next(err);
+//       if (!quizset) {
+//         Quizset.create(
+//           {
+//             $push: { quiz: quizToCreate._id },
+//             topic: quizToCreate.quizset
+//           },
+//           { new: true },
+//           (err, createdQuizset) => {
+//             if (err) return next(err);
+//           }
+//         );
+//       } else if (quizset) {
+//         Quizset.findByIdAndUpdate(
+//           quizset._id,
+//           { $push: { quiz: quizToCreate._id } },
+//           { new: true },
+//           (err, createdQuizset) => {
+//             if (err) return next(err);
+//           }
+//         );
+//       }
+//     });
+//     res.status(200).json({
+//       success: true,
+//       message: "Quiz created Succesfully!",
+//       quizToCreate
+//     });
+//   });
+// });
 
 // get a quiz
 
-router.get("/:id", (req, res, next) => {
+router.get("/:id", async (req, res, next) => {
   const id = req.params.id;
-  Quiz.findById(id, (err, quiz) => {
-    if (err) return next(err);
+  try {
+    let quiz = await Quiz.findById(id);
     if (!quiz) return res.json({ success: false, message: "quiz not found!" });
     res.json({ success: true, quiz });
-  });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 //update quiz
 
-router.put("/:id", (req, res, next) => {
+router.put("/:id", async (req, res, next) => {
   const id = req.params.id;
-  Quiz.findByIdAndUpdate(id, req.body, (err, quizToUpdate) => {
-    if (err) return next(err);
-    if (!quizToUpdate)
-      return res.json({ success: false, message: "quiz not found!" });
-    res.json({ success: true, quizToUpdate });
-  });
+  try {
+    let quiz = await Quiz.findByIdAndUpdate(id, req.body);
+    if (!quiz) return res.json({ success: false, message: "quiz not found!" });
+    res.json({ success: true, quiz });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 //delete a quiz
 
-router.delete("/:id", (req, res, next) => {
+router.delete("/:id", async (req, res, next) => {
   const id = req.params.id;
-  Quiz.findByIdAndDelete(id, (err, quizToDelete) => {
-    if (err) return next(err);
+  try {
+    let quizToDelete = await Quiz.findByIdAndDelete(id);
     if (!quizToDelete)
       return res.json({ success: false, message: "quiz not found!" });
-    Quizset.findOneAndUpdate(
+    let quizsetToUpdate = await Quizset.findOneAndUpdate(
       { topic: quizToDelete.quizset },
-      { $pull: { quiz: quizToDelete._id } },
-      (err, updatedQuizset) => {
-        if (err) return next(err);
-        if (!updatedQuizset)
-          return res.json({
-            success: false,
-            message: "can't update Quizset"
-          });
-      }
+      { $pull: { quiz: quizToDelete._id } }
     );
+    if (!quizsetToUpdate)
+      return res.json({
+        success: false,
+        message: "can't update Quizset"
+      });
     res.json({
       success: true,
       message: "succesfully  deleted quiz",
       quizToDelete
     });
-  });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 module.exports = router;

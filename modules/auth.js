@@ -21,6 +21,7 @@ exports.verifyToken = (req, res, next) => {
 
 exports.verifyAdmin = (req, res, next) => {
   const isAdmin = req.user.isadmin;
-  if (isAdmin) return next();
-  res.json({ success: false, message: "Not an Admin!" });
+  return isAdmin
+    ? next()
+    : res.json({ success: false, message: "Not an Admin!" });
 };
