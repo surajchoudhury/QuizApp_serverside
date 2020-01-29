@@ -8,37 +8,37 @@ router.use(auth.verifyToken);
 
 // get current logged user
 
-router.get("/", (req, res, next) => {
-  let { username } = req.user;
-  User.findOne({ username }, "-password").exec((err, user) => {
-    if (err) return next(err);
+router.get("/", async (req, res, next) => {
+  const { username } = req.user;
+  try {
+    const user = await User.findOne({ username }, "-password");
     if (!user) {
-      Admin.findOne({ username }, "-password").exec((err, user) => {
-        if (err) return next(err);
-        res.json({ success: true, user });
-      });
+      const user = await Admin.findOne({ username }, "-password");
+      res.json({ success: true, user });
     } else {
       res.json({ success: true, user });
     }
-  });
+  } catch (err) {
+    return next(err);
+  }
 });
 
-router.put("/", (req, res, next) => {
+router.put("/", async (req, res, next) => {
   const id = req.user.userid;
-  User.findByIdAndUpdate(id, req.body, { new: true }, (err, user) => {
-    if (err) return next(err);
+  try {
+    const user = await User.findByIdAndUpdate(id, req.body, { new: true });
     if (!user) return res.json({ success: false, message: "user not found!" });
-    User.findOneAndUpdate(
+    let userToUpdate = await User.findOneAndUpdate(
       user.score,
       { $push: { scoreList: user.score } },
-      { new: true },
-      (err, updatedUser) => {
-        if (err) return next(err);
-        if(!updatedUser) res.json({success:false,mesage:"no scores to update!"})
-        res.json({ user, success: true });
-      }
+      { new: true }
     );
-  });
+    if (!userToUpdate)
+      return res.json({ success: false, mesage: "no scores to update!" });
+    res.json({ user, success: true });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 module.exports = router;
