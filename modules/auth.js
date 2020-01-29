@@ -18,3 +18,9 @@ exports.verifyToken = (req, res, next) => {
     res.status(401).json({ success: false, message: "Token not found" });
   }
 };
+
+exports.verifyAdmin = (req, res, next) => {
+  const isAdmin = req.user.isadmin;
+  if (isAdmin) return next();
+  res.json({ success: false, message: "Not an Admin!" });
+};

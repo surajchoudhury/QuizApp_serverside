@@ -6,42 +6,83 @@ const router = express.Router();
 
 // register user
 
+// router.post("/", (req, res, next) => {
+//   User.create(req.body, (err, user) => {
+//     if (err) return next(err);
+//     if (!user) return res.json({ message: "no user found!", success: false });
+//     res.json({ user, success: true });
+//   });
+// });
 router.post("/", (req, res, next) => {
-  User.create(req.body, (err, user) => {
-    if (err) return next(err);
-    if (!user) return res.json({ message: "no user found!", success: false });
-    res.json({ user, success: true });
-  });
+  User.create(req.body)
+    .then(user => {
+      if (!user) return res.json({ sucess: false, message: "user not found!" });
+      res.json({ user, success: true });
+    })
+    .catch(err => {
+      return next(err);
+    });
 });
 
 // login user
 
+// router.post("/login", (req, res, next) => {
+// let { email, password } = req.body;
+//   User.findOne({ email }, (err, user) => {
+//     if (err) return next(err);
+//     if (!user) return res.json({ success: false, message: "invalid Email!" });
+//     user.verifyPassword(password, (err, matched) => {
+//       if (err) return next(err);
+//       if (!matched)
+//         return res
+//           .status(422)
+//           .json({ success: false, message: "invalid password" });
+//       jwt.sign(
+//         {
+//           userid: user._id,
+//           username: user.username,
+//           email: user.email,
+//           isadmin: user.isAdmin
+//         },
+//         "secret",
+//         (err, token) => {
+//           if (err) return next(err);
+//           res.json({ success: true, message: "you are logged in", token });
+//         }
+//       );
+//     });
+//   });
+// });
+
 router.post("/login", (req, res, next) => {
   let { email, password } = req.body;
-  User.findOne({ email }, (err, user) => {
-    if (err) return next(err);
-    if (!user) return res.json({ success: false, message: "invalid Email!" });
-    user.verifyPassword(password, (err, matched) => {
+  User.findOne({ email })
+    .then(user => {
+      if (!user) return res.json({ success: false, message: "invalid Email!" });
+      user.verifyPassword(password, (err, matched) => {
+        if (err) return next(err);
+        if (!matched)
+          return res.json({ success: false, message: "invalid password" });
+
+        //jwt
+        jwt.sign(
+          {
+            userid: user._id,
+            username: user.username,
+            email: user.email,
+            isadmin: user.isAdmin
+          },
+          "secret",
+          (err, token) => {
+            if (err) return next(err);
+            res.json({ success: true, message: "you are logged in", token });
+          }
+        );
+      });
+    })
+    .catch(err => {
       if (err) return next(err);
-      if (!matched)
-        return res
-          .status(422)
-          .json({ success: false, message: "invalid password" });
-      jwt.sign(
-        {
-          userid: user._id,
-          username: user.username,
-          email: user.email,
-          isadmin: user.isAdmin
-        },
-        "secret",
-        (err, token) => {
-          if (err) return next(err);
-          res.json({ success: true, message: "you are logged in", token });
-        }
-      );
     });
-  });
 });
 
 /* GET users listing. */
@@ -67,7 +108,6 @@ router.get("/:id", (req, res, next) => {
 });
 
 router.use(auth.verifyToken);
-
 
 // update user
 
