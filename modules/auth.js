@@ -23,5 +23,6 @@ exports.verifyAdmin = (req, res, next) => {
   const isAdmin = req.user.isadmin;
   return isAdmin
     ? next()
-    : res.json({ success: false, message: "Not an Admin!" });
+    : res.json({ success: false, message: "Oops! Not an Admin" });
 };
+
