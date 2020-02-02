@@ -11,6 +11,10 @@ router.get("/", User.loggedUser);
 
 //update user
 
-router.put("/", User.update);
+router.put("/", User.updateScore);
+
+//scores
+
+router.get("/scores", User.getScores);
 
 module.exports = router;

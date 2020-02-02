@@ -23,7 +23,7 @@ const userSchema = new Schema(
       default: 0
     },
     scoreList: {
-      type: [Number]
+      type: [Schema.Types.ObjectId]
     },
     isAdmin: {
       type: Boolean,

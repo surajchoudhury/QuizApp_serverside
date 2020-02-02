@@ -1,9 +1,8 @@
-
 const Admin = require("../models/admin");
 const User = require("../models/user");
+const Score = require("../models/score");
 
 module.exports = {
-  
   // get logged user
 
   loggedUser: async (req, res, next) => {
@@ -21,20 +20,55 @@ module.exports = {
     }
   },
 
-  update: async (req, res, next) => {
-    const id = req.user.userid;
+  // update: async (req, res, next) => {
+  //   const id = req.user.userid;
+  //   try {
+  //     const user = await User.findByIdAndUpdate(id, req.body, { new: true });
+  //     if (!user)
+  //       return res.json({ success: false, message: "user not found!" });
+  //     let userToUpdate = await User.findOneAndUpdate(
+  //       user.score,
+  //       { $push: { scoreList: user.score } },
+  //       { new: true }
+  //     );
+  //     if (!userToUpdate)
+  //       return res.json({ success: false, mesage: "no scores to update!" });
+  //     res.json({ user, success: true });
+  //   } catch (err) {
+  //     return next(err);
+  //   }
+  // },
+
+  updateScore: async (req, res, next) => {
+    let { userid } = req.user;
+    req.body.userId = userid;
     try {
-      const user = await User.findByIdAndUpdate(id, req.body, { new: true });
-      if (!user)
-        return res.json({ success: false, message: "user not found!" });
-      let userToUpdate = await User.findOneAndUpdate(
-        user.score,
-        { $push: { scoreList: user.score } },
+      let score = await Score.create(req.body);
+      let scoreToUpdate = await Score.findOneAndUpdate(
+        { _id: score._id },
+        {
+          user: req.body.userId
+        }
+      );
+      let user = await User.findByIdAndUpdate(
+        score.userId,
+        { $push: { scoreList: score._id }, score: score.score },
         { new: true }
       );
-      if (!userToUpdate)
-        return res.json({ success: false, mesage: "no scores to update!" });
-      res.json({ user, success: true });
+      return res.json({ score, user, success: true });
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+  getScores: async (req, res, next) => {
+    try {
+      let scores = await Score.find({})
+        .populate("user")
+        .sort({ createdAt: -1 });
+      if (!scores)
+        return res.json({ success: false, message: "No scores found!" });
+      res.json({ success: true, scores });
     } catch (err) {
       return next(err);
     }
