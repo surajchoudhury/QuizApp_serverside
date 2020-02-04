@@ -2,7 +2,6 @@ const Question = require("../models/question");
 const Quizset = require("../models/quizset");
 
 module.exports = {
-
   // list all quizes
 
   listQuizzes: (req, res, next) => {
@@ -27,6 +26,7 @@ module.exports = {
           success: false,
           message: "can't create question!"
         });
+
       Question.findByIdAndUpdate(
         questionToCreate._id,
         { author: req.body.userid },
@@ -34,12 +34,16 @@ module.exports = {
           if (err) return next(err);
         }
       );
-      questionToCreate.quizset.forEach(topic => {
-        Quizset.findOne({ topic }, (err, topicToFind) => {
+      Quizset.findOne(
+        { topic: questionToCreate.quizset },
+        (err, topicToFind) => {
           if (err) return next(err);
           if (!topicToFind) {
             Quizset.create(
-              { $push: { questions: questionToCreate._id }, topic },
+              {
+                $push: { questions: questionToCreate._id },
+                topic: questionToCreate.quizset
+              },
               (err, createdTopic) => {
                 if (err) return next(err);
               }
@@ -54,8 +58,8 @@ module.exports = {
               }
             );
           }
-        });
-      });
+        }
+      );
       if (err) res.json({ message: "Can't create Question" });
       res.status(200).json({ success: true, questionToCreate });
     });
@@ -70,6 +74,20 @@ module.exports = {
       if (!question)
         return res.json({ success: false, message: "question not found!" });
       res.json({ success: true, question });
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+  //get quiestions
+
+  questions: async (req, res, next) => {
+    const topic = req.params.topic;
+    try {
+      let questions = await Question.find({ quizset: topic });
+      if (!questions)
+        return res.json({ success: false, message: "No questions found!" });
+      res.json({ success: true, questions });
     } catch (err) {
       return next(err);
     }

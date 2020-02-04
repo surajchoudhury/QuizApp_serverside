@@ -18,13 +18,6 @@ const userSchema = new Schema(
       type: String,
       required: true
     },
-    score: {
-      type: Number,
-      default: 0
-    },
-    scoreList: {
-      type: [Schema.Types.ObjectId]
-    },
     isAdmin: {
       type: Boolean,
       default: false

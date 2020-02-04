@@ -17,4 +17,8 @@ router.put("/", User.updateScore);
 
 router.get("/scores", User.getScores);
 
+//score
+
+router.get("/score", User.getscore);
+
 module.exports = router;

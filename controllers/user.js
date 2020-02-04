@@ -50,12 +50,7 @@ module.exports = {
           user: req.body.userId
         }
       );
-      let user = await User.findByIdAndUpdate(
-        score.userId,
-        { $push: { scoreList: score._id }, score: score.score },
-        { new: true }
-      );
-      return res.json({ score, user, success: true });
+      return res.json({ scoreToUpdate, success: true });
     } catch (err) {
       return next(err);
     }
@@ -65,10 +60,22 @@ module.exports = {
     try {
       let scores = await Score.find({})
         .populate("user")
-        .sort({ createdAt: -1 });
+        .sort({ score: -1 });
       if (!scores)
         return res.json({ success: false, message: "No scores found!" });
       res.json({ success: true, scores });
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+  getscore: async (req, res, next) => {
+    let { userid } = req.user;
+    try {
+      let score = await Score.find({ user: userid });
+      if (!score)
+        return res.json({ success: false, message: "No records found!" });
+      res.json({ success: true, score });
     } catch (err) {
       return next(err);
     }

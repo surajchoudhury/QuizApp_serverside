@@ -7,6 +7,10 @@ const auth = require("../../modules/auth");
 
 router.get("/", Question.listQuizzes);
 
+//get questions
+
+router.get("/:topic/questions", Question.questions);
+
 router.use(auth.verifyToken);
 
 // only admins can access

@@ -22,7 +22,7 @@ const questionSchema = new Schema(
       ref: "Admin"
     },
     quizset: {
-      type: [String],
+      type: String,
       required: true
     }
   },
