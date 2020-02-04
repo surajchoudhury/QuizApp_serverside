@@ -20,25 +20,6 @@ module.exports = {
     }
   },
 
-  // update: async (req, res, next) => {
-  //   const id = req.user.userid;
-  //   try {
-  //     const user = await User.findByIdAndUpdate(id, req.body, { new: true });
-  //     if (!user)
-  //       return res.json({ success: false, message: "user not found!" });
-  //     let userToUpdate = await User.findOneAndUpdate(
-  //       user.score,
-  //       { $push: { scoreList: user.score } },
-  //       { new: true }
-  //     );
-  //     if (!userToUpdate)
-  //       return res.json({ success: false, mesage: "no scores to update!" });
-  //     res.json({ user, success: true });
-  //   } catch (err) {
-  //     return next(err);
-  //   }
-  // },
-
   updateScore: async (req, res, next) => {
     let { userid } = req.user;
     req.body.userId = userid;
@@ -72,7 +53,7 @@ module.exports = {
   getscore: async (req, res, next) => {
     let { userid } = req.user;
     try {
-      let score = await Score.find({ user: userid });
+      let score = await Score.find({ user: userid }).sort({ createdAt: -1 });
       if (!score)
         return res.json({ success: false, message: "No records found!" });
       res.json({ success: true, score });
