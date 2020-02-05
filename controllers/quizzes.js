@@ -2,6 +2,7 @@ const Question = require("../models/question");
 const Quizset = require("../models/quizset");
 
 module.exports = {
+  
   // list all quizes
 
   listQuizzes: (req, res, next) => {
@@ -16,54 +17,6 @@ module.exports = {
   },
 
   // only admins can access
-
-  create: (req, res, next) => {
-    req.body.userid = req.user.userid;
-    Question.create(req.body, (err, questionToCreate) => {
-      if (err) return next(err);
-      if (!questionToCreate)
-        return res.json({
-          success: false,
-          message: "can't create question!"
-        });
-
-      Question.findByIdAndUpdate(
-        questionToCreate._id,
-        { author: req.body.userid },
-        (err, updated) => {
-          if (err) return next(err);
-        }
-      );
-      Quizset.findOne(
-        { topic: questionToCreate.quizset },
-        (err, topicToFind) => {
-          if (err) return next(err);
-          if (!topicToFind) {
-            Quizset.create(
-              {
-                $push: { questions: questionToCreate._id },
-                topic: questionToCreate.quizset
-              },
-              (err, createdTopic) => {
-                if (err) return next(err);
-              }
-            );
-          } else if (topicToFind) {
-            Quizset.findByIdAndUpdate(
-              topicToFind._id,
-              { $push: { questions: questionToCreate._id } },
-              { new: true },
-              (err, createdTopic) => {
-                if (err) return next(err);
-              }
-            );
-          }
-        }
-      );
-      if (err) res.json({ message: "Can't create Question" });
-      res.status(200).json({ success: true, questionToCreate });
-    });
-  },
 
   // get a quiz
 

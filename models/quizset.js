@@ -11,7 +11,8 @@ const quizsetSchema = new Schema(
       }
     ],
     topic: {
-      type: String
+      type: String,
+      unique: true
     }
   },
   { timestamps: true }

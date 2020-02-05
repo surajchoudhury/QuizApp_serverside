@@ -15,8 +15,6 @@ router.use(auth.verifyToken);
 
 // only admins can access
 
-router.post("/", auth.verifyAdmin, Question.create);
-
 // get a quiz
 
 router.get("/:id", auth.verifyAdmin, Question.quiz);

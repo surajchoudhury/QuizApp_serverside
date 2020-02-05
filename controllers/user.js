@@ -3,6 +3,7 @@ const User = require("../models/user");
 const Score = require("../models/score");
 
 module.exports = {
+  
   // get logged user
 
   loggedUser: async (req, res, next) => {
