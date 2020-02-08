@@ -9,9 +9,13 @@ router.use(auth.verifyToken);
 
 router.get("/", User.loggedUser);
 
-//update user
+//update score
 
 router.put("/", User.updateScore);
+
+//update user
+
+router.patch("/", User.updateUser);
 
 //scores
 

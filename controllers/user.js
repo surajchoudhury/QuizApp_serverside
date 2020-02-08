@@ -3,7 +3,6 @@ const User = require("../models/user");
 const Score = require("../models/score");
 
 module.exports = {
-  
   // get logged user
 
   loggedUser: async (req, res, next) => {
@@ -14,6 +13,26 @@ module.exports = {
         const user = await Admin.findOne({ username }, "-password");
         res.json({ success: true, user });
       } else {
+        res.json({ success: true, user });
+      }
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+  updateUser: async (req, res, next) => {
+    let isAdmin = req.user.isAdmin;
+    let id = req.user.userid;
+    try {
+      if (isAdmin) {
+        let user = await Admin.findByIdAndUpdate(id, req.body, { new: true });
+        if (!user)
+          return res.json({ success: false, message: "Invalid Admin id" });
+        res.json({ success: true, user });
+      } else {
+        let user = await User.findByIdAndUpdate(id, req.body, { new: true });
+        if (!user)
+          return res.json({ success: false, message: "Invalid user id" });
         res.json({ success: true, user });
       }
     } catch (err) {

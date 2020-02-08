@@ -31,4 +31,8 @@ router.put("/:id", auth.verifyAdmin, Quizset.update);
 
 router.delete("/:id", auth.verifyAdmin, Quizset.delete);
 
+//delete question
+
+router.delete("/:topic/question/:id", auth.verifyAdmin, Quizset.deleteQuestion);
+
 module.exports = router;

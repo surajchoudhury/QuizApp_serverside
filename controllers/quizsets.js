@@ -6,7 +6,7 @@ module.exports = {
 
   listQuizsets: async (req, res, next) => {
     try {
-      let quizsets = await Quizset.find({});
+      let quizsets = await Quizset.find({}).populate("questions");
       res.json({ success: true, quizsets });
     } catch (err) {
       return next(err);
@@ -132,6 +132,31 @@ module.exports = {
         success: true,
         message: "quizset deleted succesfully!"
       });
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+  //delete question
+
+  deleteQuestion: async (req, res, next) => {
+    const id = req.params.id;
+    const topic = req.params.topic;
+    try {
+      let quizset = await Quizset.findOne({ topic });
+      if (quizset.questions.includes(id)) {
+        let quizsetToUpdate = await Quizset.findByIdAndUpdate(
+          quizset._id,
+          {
+            $pull: { questions: id }
+          },
+          { new: true }
+        );
+        let questionToUpdate = await Question.findByIdAndDelete(id);
+        if (!questionToUpdate)
+          return res.json({ success: false, message: "can't find question" });
+        res.json({ success: true, quizsetToUpdate });
+      }
     } catch (err) {
       return next(err);
     }

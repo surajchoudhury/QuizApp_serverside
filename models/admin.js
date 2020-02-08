@@ -18,6 +18,9 @@ const adminSchema = new Schema(
       type: String,
       required: true
     },
+    profile: {
+      type: String
+    },
     isAdmin: {
       type: Boolean,
       default: true
