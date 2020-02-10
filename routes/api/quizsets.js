@@ -15,6 +15,12 @@ router.get("/:topic", Quizset.quizset);
 
 router.use(auth.verifyToken);
 
+//add user in quizset
+
+router.post("/:topic/add", Quizset.completedQuizset);
+
+// router.post("/:topic/delete", Quizset.deleteUser);
+
 //create quizset
 
 router.post("/", auth.verifyAdmin, Quizset.create);

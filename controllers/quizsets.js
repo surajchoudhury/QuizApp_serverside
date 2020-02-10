@@ -1,4 +1,5 @@
 const Quizset = require("../models/quizset");
+const User = require("../models/user");
 const Question = require("../models/question");
 
 module.exports = {
@@ -160,5 +161,50 @@ module.exports = {
     } catch (err) {
       return next(err);
     }
+  },
+
+  completedQuizset: async (req, res, next) => {
+    const userid = req.user.userid;
+    const topic = req.params.topic;
+    try {
+      let quizset = await Quizset.findOne({ topic });
+      if (!quizset)
+        return res.json({
+          success: false,
+          message: "No Quizset found by topic!"
+        });
+      if (!quizset.completedByUsers.includes(userid)) {
+        let quizsetToUpdate = await Quizset.findOneAndUpdate(
+          { topic },
+          {
+            $push: { completedByUsers: userid }
+          },
+          { new: true }
+        );
+        res.json({ success: true, quizsetToUpdate });
+      } else {
+        res.json({
+          success: false,
+          message: "Already added in completed List!"
+        });
+      }
+    } catch (err) {
+      return next(err);
+    }
   }
+  // deleteUser: (req, res, next) => {
+  //   let topic = req.params.topic;
+  //   let userid = req.user.userid;
+  //   Quizset.findOneAndUpdate(
+  //     { topic },
+  //     {
+  //       $pull: { completedByUsers: userid }
+  //     },
+  //     { new: true },
+  //     (err, quiz) => {
+  //       if (err) return next(err);
+  //       res.json(quiz);
+  //     }
+  //   );
+  // }
 };

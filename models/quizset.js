@@ -13,7 +13,13 @@ const quizsetSchema = new Schema(
     topic: {
       type: String,
       unique: true
-    }
+    },
+    completedByUsers: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User"
+      }
+    ]
   },
   { timestamps: true }
 );

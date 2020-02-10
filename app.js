@@ -26,7 +26,7 @@ app.use(express.static(path.join(__dirname, "public")));
 //connecting to mongodb
 
 mongoose.connect(
-  "mongodb://localhost/Quizapp",
+  "mongodb+srv://sunny:12345@cluster0-ie9i8.mongodb.net/test?retryWrites=true&w=majority",
   { useNewUrlParser: true, useUnifiedTopology: true },
   err => {
     console.log("connected ", err ? err : true);
@@ -34,14 +34,16 @@ mongoose.connect(
 );
 
 // routes
-
 app.use("/", indexRouter);
 app.use("/api/v1/users", usersRouter);
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/admins", adminsRouter);
 app.use("/api/v1/quizzes", quizzesRouter);
 app.use("/api/v1/quizsets", quizSetsRouter);
-
+// sending index.html file from public
+app.get("*", (req, res, next) => {
+  res.sendFile(__dirname, "public/index.html");
+})
 // error handlers
 
 app.use((err, req, res, next) => {
