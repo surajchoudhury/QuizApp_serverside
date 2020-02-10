@@ -1,5 +1,5 @@
 const Quizset = require("../models/quizset");
-const User = require("../models/user");
+// const User = require("../models/user");
 const Question = require("../models/question");
 
 module.exports = {
@@ -115,6 +115,21 @@ module.exports = {
       });
       if (!quizset)
         return res.json({ success: false, message: "quizset not found!" });
+      res.json({ success: true, quizset });
+      if (quizset.questions.length) {
+        quizset.questions.forEach(question => {
+          Question.findByIdAndUpdate(
+            question._id,
+            {
+              quizset: quizset.topic
+            },
+            { new: true },
+            (err, question) => {
+              if (err) return next(err);
+            }
+          );
+        });
+      }
       res.json({ success: true, quizset });
     } catch (err) {
       return next(err);

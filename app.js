@@ -33,6 +33,14 @@ mongoose.connect(
   }
 );
 
+// mongoose.connect(
+//   "mongodb://localhost/Quizapp",
+//   { useNewUrlParser: true, useUnifiedTopology: true },
+//   err => {
+//     console.log("connected", err ? err : true);
+//   }
+// );
+
 // routes
 app.use("/", indexRouter);
 app.use("/api/v1/users", usersRouter);
