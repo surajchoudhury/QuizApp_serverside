@@ -43,7 +43,7 @@ app.use("/api/v1/quizsets", quizSetsRouter);
 // sending index.html file from public
 app.get("*", (req, res, next) => {
   res.sendFile(__dirname, "public/index.html");
-})
+});
 // error handlers
 
 app.use((err, req, res, next) => {
