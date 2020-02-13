@@ -42,7 +42,7 @@ mongoose.connect(
 // );
 
 // routes
-app.use("/", indexRouter);
+// app.use("/", indexRouter);
 app.use("/api/v1/users", usersRouter);
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/admins", adminsRouter);
